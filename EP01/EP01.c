@@ -1,0 +1,312 @@
+/* podemos inserir grafo como uma biblioteca de uso para enxugar mais esse codigo */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+#include <malloc.h>
+#include <limits.h>
+
+#define true 1
+#define false 0
+
+typedef int BOOL;
+
+// nos das listas de adjacencias
+// usados no grafo, e para uso tambem na lista de resposta
+typedef struct adj {
+	int v;
+    int custo;
+	struct adj* prox;
+} NO;
+
+// vertices
+typedef struct {
+    int tipo;
+	NO* inicio;
+} VERTICE;
+
+/*---------- FUNCOES IMPLEMENTADAS ----------*/
+// ALUNOS E GRUPO 
+int grupo();
+int nroUSP1();
+int nroUSP2();
+void imprimeNumUSPeGrupo(int nroUSP1, int nroUSP2, int grupo);
+// GRAFO 
+VERTICE* criarGrafo(int v);
+NO* criarAdj(int v, int custo);
+BOOL criarAresta(VERTICE* gr, int vi, int vf, int custo, int V);
+BOOL setAtracao(VERTICE* gr, int vAlterado, int tipo, int numVertices);
+void imprimeGrafo(VERTICE* gr, int V);
+// DIJKSTRA
+void  inicializaD(VERTICE* g, int* d, int* p, int s, int V);
+void relaxa(VERTICE *g, int* d, int* p, int u, int v);
+int* dijkstraAlterado(VERTICE* g, int s, int tipo, int V);
+BOOL existeAberto(VERTICE* g, int* aberto, int V);
+int menorDist(VERTICE* g, int* aberto, int* d, int V);
+// LISTA LIGADA
+NO* buscaSeq(NO* lista, int vert, NO** ant);
+BOOL inserirElementoLista(NO* inicio, int vertice);
+void imprimeListaLigada(NO* lista);
+// FUNCAO DO EP
+// funcao principal (assinatura exigida por alguns compiladores)
+NO* EncontrarCaminho(VERTICE* g, int V, int v1, int t);
+
+// ######### ESCREVA O NRO DO SEU GRUPO AQUI CONFORME CADASTRADO EM
+// https://docs.google.com/spreadsheets/d/1_wy0Uko3vX8GE07G1WP4X6X6-yRdu6eCpLdmmRvU7EM/edit?usp=sharing
+
+int grupo() {
+    return 7;
+}
+
+// ######### ESCREVA O NROUSP AQUI
+int nroUSP1() {
+    return 12454;
+}
+
+int nroUSP2() {
+    return 1212;
+}
+
+void imprimeNumUSPeGrupo(int nroUSP1, int nroUSP2, int grupo){
+    printf("|==============INTEGRANTES E GRUPO==============|\n");
+    printf("\tNroUSP1: %d", nroUSP1);
+    printf("\tGrupo: %d\n", grupo);
+    printf("\tNroUSP2: %d\n", nroUSP2);
+}
+
+/* -------------------------------DIJKSTRA-------------------------------------- */
+int* dijkstraAlterado(VERTICE* g, int s, int tipo, int V) {
+    int* d = (int*) malloc(sizeof(int) * V); // Armazena as distancias do vertice inial aos demais
+    int u;
+    int p[V]; //armazena qual o vertice anterior de cada vertice, partindo do vertice inicial
+    BOOL aberto[V]; // guarda quais vertices tem um caminho possivel/aberto ainda
+    inicializaD(g, d, p, s, V); //
+
+    int i;
+    for(i = 0; i < V; i++) // define todos os caminhos como abertos
+        aberto[i] = true;
+
+    // enquando existir caminho abertos, ele registra a menor distancia entre o vertice inicial e os demais vertices
+    while(existeAberto(g, aberto, V)) {
+        u = menorDist(g, aberto, d, V);
+        aberto[u] = false;
+        NO* ad = g[u].inicio;
+        while(ad) {
+            relaxa(g, d, p, u, ad->v);
+            ad = ad->prox;
+        }
+    }
+
+
+    int menorCusto = INT_MAX/2;
+    int vertComMenorCusto = -1;
+    /* verifica o vertice com menor custo */
+    for(i = 0; i < V; i++){
+        if(g[i].tipo == tipo && d[i] < menorCusto) {
+            vertComMenorCusto = i;
+            menorCusto = d[i];
+        }
+    }
+    /* cria uma lista com os vertices de menor caminho do inicial ate o tipo buscado */
+    int* listaComCaminhoVertMenorCusto = (int*) malloc(sizeof(int)*V);
+    for(i = 0; i < V; i++) {
+        if(p[vertComMenorCusto] != -1) {
+            listaComCaminhoVertMenorCusto[i] = vertComMenorCusto;
+            vertComMenorCusto = p[vertComMenorCusto];
+        } else {
+            listaComCaminhoVertMenorCusto[i] = - 1;
+        }
+    } 
+
+    /* CAMINHO DE V4 até V0*/
+    /*
+    int t = 4;
+    printf("\nv%d", t);
+    while(p[4] != -1){
+        printf(" -> v%d", p[t]);
+        t = p[t];
+    }
+    printf("\n");
+    */
+
+    return listaComCaminhoVertMenorCusto;
+}
+
+/*
+* Inicializa os arrays colocando a distancia dos outros vertice ao inicial como o maior valor possivel 
+* define -1 como anterior para todos os vertices  
+*/
+void inicializaD(VERTICE* g, int* d, int* p, int s, int V) {
+    int v;
+    for(v = 0; v < V; v++) {
+        d[v] = (int) INT_MAX/2;
+        p[v] = -1;
+    }
+    d[s] = 0;
+}
+
+void relaxa(VERTICE *g, int* d, int* p, int u, int v) {
+    NO* ad = g[u].inicio;
+    while(ad && ad->v != v){
+       ad = ad->prox;
+    }
+    if(ad) {
+        if(d[v] > d[u] + ad->custo) {
+            d[v] = d[u] + ad->custo;
+            p[v] = u;
+        }
+    }
+}
+
+BOOL existeAberto(VERTICE* g, int* aberto, int V) {
+    int i;
+    for(i = 0; i< V; i++) {
+        if(aberto[i]) return true;
+    }
+    return false;
+}
+
+/* verifica a menor distancia entre os vertices, partindo do vertice inicial */ 
+int menorDist(VERTICE* g, int* aberto, int* d, int V){
+    int i;
+    for(i = 0; i < V; i++) 
+        if(aberto[i]) break;
+    if(i == V) return -1;
+    int menor = i;
+    for(i = menor+1; i < V; i++) 
+        if(aberto[i] && (d[menor] > d[i]))
+            menor = i;
+    return menor;
+}
+
+/* -------------------------------DIJKSTRA-------------------------------------- */
+
+/* -----------------LISTA LIGADA CONTENDO OS NOS--------------------- */
+NO* buscaSeq(NO* lista, int vert, NO** ant){
+    *ant = NULL;
+    NO* atual = lista;
+    while(atual != NULL) {
+        *ant = atual;
+        atual = atual->prox;
+    }
+    if(atual != NULL) return atual;
+    return NULL;
+}
+
+BOOL inserirElementoLista(NO* inicio, int vertice) {
+    NO* ant;
+    NO* i = buscaSeq(inicio, vertice, &ant);
+    if (i != NULL) return false;
+    i = (NO*) malloc(sizeof(NO));
+    i->v = vertice;
+    if(ant == NULL) {
+        i->prox = inicio;
+        inicio = i;
+    } else {
+        i->prox = ant->prox;
+        ant->prox = i;
+    }
+    return true;
+}
+
+void imprimeListaLigada(NO* lista) {
+    if(!lista) return;
+    printf("|=================LISTA LIGADA==================|\n\t");
+    while(lista) {
+        printf("v%d ", lista->v);
+        if(lista->prox) printf("-> ");
+        lista = lista->prox;
+    }
+}
+
+/* -----------------LISTA LIGADA CONTENDO OS NOS--------------------- */
+
+/* ---------------------- FUNCAO DO EP ---------------------- */
+//------------------------------------------
+// O EP consiste em implementar esta funcao
+// e outras funcoes auxiliares que esta
+// necessitar
+//------------------------------------------
+NO* EncontrarCaminho(VERTICE* g, int V, int v1, int t)
+{
+	if(!g) return NULL;
+    if(v1 < 0 || v1 > V) return NULL;
+    int i, temTipo = false;
+    /* verifica se existe o tipo procurado em um dos vertices */ 
+    for(i = 0; i < V; i++) {
+        if(g[i].tipo == t) {
+            temTipo = true;
+            break;
+        }
+    }
+    if(!temTipo) return NULL;
+
+    /* Obtem um array com os vertices do vertice inicial ate o vertice final que possui a atracao e tem o menor caminho */
+    int* caminhoAnterior = dijkstraAlterado(g, v1, t, V);
+    /* verfica o tamanho da lista */
+    i=0;
+    while(caminhoAnterior[i] != -1) i++;
+
+    /* cria uma lista partindo do inicio e inserindo todos os nos ate o vertice final */
+    i--;
+    NO* inicio = criarAdj(v1, 0);
+    while(i >= 0) {
+        inserirElementoLista(inicio, caminhoAnterior[i]);
+        i--;
+    }     
+
+   return inicio;
+}
+/* ---------------------- FUNCAO DO EP ---------------------- */
+
+/* -----------------CIRACAO DO GRAFO--------------------- */
+VERTICE* criarGrafo(int v) {
+    VERTICE* grafo = (VERTICE*) malloc(sizeof(VERTICE)*v);
+    int i;
+    for(i = 0; i < v; i++){
+        grafo[i].inicio = NULL;
+        grafo[i].tipo = -1;
+    }
+    return grafo;
+}
+
+NO* criarAdj(int v, int custo) {
+    NO* temp = (NO*) malloc(sizeof(NO));
+    temp->custo = custo;
+    temp->v = v;
+    temp->prox = NULL;
+    return temp;
+}
+
+BOOL criarAresta(VERTICE* gr, int vi, int vf, int custo, int V) {
+    if(!gr) return false;
+    if((vi < 0) || (vi >= V)) return false;
+    if((vf < 0) || (vf >= V)) return false;
+    NO* novo = criarAdj(vf, custo);
+    novo->prox = gr[vi].inicio;
+    gr[vi].inicio = novo;
+    return true;
+}
+
+BOOL setAtracao(VERTICE* gr, int vAlterado, int tipo, int numVertices) {
+    if(!gr) return false;
+    if((vAlterado < 0) || (vAlterado >= numVertices)) return false;
+    gr[vAlterado].tipo = tipo;
+    return true;
+}
+
+void imprimeGrafo(VERTICE* gr, int V) {
+    if(!gr) return;
+    printf("|=====================GRAFO=====================|\n");
+    int i;
+    for(i = 0; i < V; i++) {
+        printf("\tv%d(%d): ", i, gr[i].tipo);
+        NO* ad = gr[i].inicio;
+        while(ad) {
+            printf("v%d(%d) ", ad->v, ad->custo);
+            ad = ad->prox;
+        }
+        printf("\n");
+    }
+}
+
