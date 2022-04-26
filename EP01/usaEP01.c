@@ -157,3 +157,22 @@ void buscaImprimeMenorCaminho(VERTICE* g, int V, int v1, int t) {
     printf("O menor caminho indo de V%d ate o tipo %d e:\n", V, t);
     imprimeListaLigada(lista);
 }
+
+
+/*--------------------SAIDA------------------*/
+/*
+|==============INTEGRANTES E GRUPO==============|
+        NroUSP1: 12454  Grupo: 7
+        NroUSP2: 1212
+|=====================GRAFO=====================|
+        v0(0): v0(2) v1(2) 
+        v1(1): v2(2) 
+        v2(2): v4(2) v3(2) v0(2) 
+        v3(3): v1(2) 
+        v4(3): v3(2) 
+|===============================================|
+Nao existe caminho indo do v5 ate o tipo 4
+O menor caminho indo de V5 ate o tipo 3 e:
+|=================LISTA LIGADA==================|
+        v0 -> v1 -> v2 -> v3
+*/
