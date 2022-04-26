@@ -30,13 +30,6 @@ typedef struct {
 int grupo();
 int nroUSP1();
 int nroUSP2();
-void imprimeNumUSPeGrupo(int nroUSP1, int nroUSP2, int grupo);
-// GRAFO 
-VERTICE* criarGrafo(int v);
-NO* criarAdj(int v, int custo);
-BOOL criarAresta(VERTICE* gr, int vi, int vf, int custo, int V);
-BOOL setAtracao(VERTICE* gr, int vAlterado, int tipo, int numVertices);
-void imprimeGrafo(VERTICE* gr, int V);
 // DIJKSTRA
 void  inicializaD(VERTICE* g, int* d, int* p, int s, int V);
 void relaxa(VERTICE *g, int* d, int* p, int u, int v);
@@ -44,9 +37,9 @@ int* dijkstraAlterado(VERTICE* g, int s, int tipo, int V);
 BOOL existeAberto(VERTICE* g, int* aberto, int V);
 int menorDist(VERTICE* g, int* aberto, int* d, int V);
 // LISTA LIGADA
+NO* criarNo(int v, int custo);
 NO* buscaSeq(NO* lista, int vert, NO** ant);
 BOOL inserirElementoLista(NO* inicio, int vertice);
-void imprimeListaLigada(NO* lista);
 // FUNCAO DO EP
 // funcao principal (assinatura exigida por alguns compiladores)
 NO* EncontrarCaminho(VERTICE* g, int V, int v1, int t);
@@ -65,13 +58,6 @@ int nroUSP1() {
 
 int nroUSP2() {
     return 1212;
-}
-
-void imprimeNumUSPeGrupo(int nroUSP1, int nroUSP2, int grupo){
-    printf("|==============INTEGRANTES E GRUPO==============|\n");
-    printf("\tNroUSP1: %d", nroUSP1);
-    printf("\tGrupo: %d\n", grupo);
-    printf("\tNroUSP2: %d\n", nroUSP2);
 }
 
 /* -------------------------------DIJKSTRA-------------------------------------- */
@@ -182,6 +168,14 @@ int menorDist(VERTICE* g, int* aberto, int* d, int V){
 /* -------------------------------DIJKSTRA-------------------------------------- */
 
 /* -----------------LISTA LIGADA CONTENDO OS NOS--------------------- */
+NO* criarNo(int v, int custo) {
+    NO* temp = (NO*) malloc(sizeof(NO));
+    temp->custo = custo;
+    temp->v = v;
+    temp->prox = NULL;
+    return temp;
+}
+
 NO* buscaSeq(NO* lista, int vert, NO** ant){
     *ant = NULL;
     NO* atual = lista;
@@ -207,16 +201,6 @@ BOOL inserirElementoLista(NO* inicio, int vertice) {
         ant->prox = i;
     }
     return true;
-}
-
-void imprimeListaLigada(NO* lista) {
-    if(!lista) return;
-    printf("|=================LISTA LIGADA==================|\n\t");
-    while(lista) {
-        printf("v%d ", lista->v);
-        if(lista->prox) printf("-> ");
-        lista = lista->prox;
-    }
 }
 
 /* -----------------LISTA LIGADA CONTENDO OS NOS--------------------- */
@@ -249,7 +233,7 @@ NO* EncontrarCaminho(VERTICE* g, int V, int v1, int t)
 
     /* cria uma lista partindo do inicio e inserindo todos os nos ate o vertice final */
     i--;
-    NO* inicio = criarAdj(v1, 0);
+    NO* inicio = criarNo(v1, 0);
     while(i >= 0) {
         inserirElementoLista(inicio, caminhoAnterior[i]);
         i--;
@@ -258,55 +242,4 @@ NO* EncontrarCaminho(VERTICE* g, int V, int v1, int t)
    return inicio;
 }
 /* ---------------------- FUNCAO DO EP ---------------------- */
-
-/* -----------------CIRACAO DO GRAFO--------------------- */
-VERTICE* criarGrafo(int v) {
-    VERTICE* grafo = (VERTICE*) malloc(sizeof(VERTICE)*v);
-    int i;
-    for(i = 0; i < v; i++){
-        grafo[i].inicio = NULL;
-        grafo[i].tipo = -1;
-    }
-    return grafo;
-}
-
-NO* criarAdj(int v, int custo) {
-    NO* temp = (NO*) malloc(sizeof(NO));
-    temp->custo = custo;
-    temp->v = v;
-    temp->prox = NULL;
-    return temp;
-}
-
-BOOL criarAresta(VERTICE* gr, int vi, int vf, int custo, int V) {
-    if(!gr) return false;
-    if((vi < 0) || (vi >= V)) return false;
-    if((vf < 0) || (vf >= V)) return false;
-    NO* novo = criarAdj(vf, custo);
-    novo->prox = gr[vi].inicio;
-    gr[vi].inicio = novo;
-    return true;
-}
-
-BOOL setAtracao(VERTICE* gr, int vAlterado, int tipo, int numVertices) {
-    if(!gr) return false;
-    if((vAlterado < 0) || (vAlterado >= numVertices)) return false;
-    gr[vAlterado].tipo = tipo;
-    return true;
-}
-
-void imprimeGrafo(VERTICE* gr, int V) {
-    if(!gr) return;
-    printf("|=====================GRAFO=====================|\n");
-    int i;
-    for(i = 0; i < V; i++) {
-        printf("\tv%d(%d): ", i, gr[i].tipo);
-        NO* ad = gr[i].inicio;
-        while(ad) {
-            printf("v%d(%d) ", ad->v, ad->custo);
-            ad = ad->prox;
-        }
-        printf("\n");
-    }
-}
 
