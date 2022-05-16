@@ -55,7 +55,7 @@ int main()
     imprimeGrafo(grafo, numVertices);
 
     /* LITORAL 0 | FESTIVAL 1 | CONSTRUCOES 2 | MONTANHAS 3 | CACHOEIRA 4 */
-    int vertInicial = 0, tipo = CACHOEIRA;
+    int vertInicial = 0, tipo = LITORAL;
     /* Encontra o menor caminho do vertice inicial a ao vertice com a atracao buscada*/
     buscaImprimeMenorCaminho(grafo, numVertices, vertInicial, tipo);
     tipo = MONTANHAS;
@@ -154,7 +154,7 @@ void buscaImprimeMenorCaminho(VERTICE* g, int V, int v1, int t) {
         printf("Nao existe caminho indo do v%d ate o tipo %d\n", V, t);
         return;
     }
-    printf("O menor caminho indo de V%d ate o tipo %d e:\n", V, t);
+    printf("O menor caminho indo de V%d ate o tipo %d e:\n", v1, t);
     imprimeListaLigada(lista);
 }
 
