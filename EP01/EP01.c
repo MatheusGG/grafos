@@ -38,7 +38,7 @@ BOOL existeAberto(VERTICE* g, int* aberto, int V);
 int menorDist(VERTICE* g, int* aberto, int* d, int V);
 // LISTA LIGADA
 NO* criarNo(int v, int custo);
-NO* buscaSeq(NO* lista, int vert, NO** ant);
+NO* buscaSeq(NO* lista, NO** ant);
 BOOL inserirElementoLista(NO* inicio, int vertice);
 // FUNCAO DO EP
 // funcao principal (assinatura exigida por alguns compiladores)
@@ -53,11 +53,11 @@ int grupo() {
 
 // ######### ESCREVA O NROUSP AQUI
 int nroUSP1() {
-    return 12454;
+    return 9023030;
 }
 
 int nroUSP2() {
-    return 1212;
+    return 12692367;
 }
 
 /* -------------------------------DIJKSTRA-------------------------------------- */
@@ -176,7 +176,7 @@ NO* criarNo(int v, int custo) {
     return temp;
 }
 
-NO* buscaSeq(NO* lista, int vert, NO** ant){
+NO* buscaSeq(NO* lista, NO** ant){
     *ant = NULL;
     NO* atual = lista;
     while(atual != NULL) {
@@ -189,7 +189,7 @@ NO* buscaSeq(NO* lista, int vert, NO** ant){
 
 BOOL inserirElementoLista(NO* inicio, int vertice) {
     NO* ant;
-    NO* i = buscaSeq(inicio, vertice, &ant);
+    NO* i = buscaSeq(inicio, &ant);
     if (i != NULL) return false;
     i = (NO*) malloc(sizeof(NO));
     i->v = vertice;
